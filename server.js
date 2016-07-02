@@ -39,12 +39,14 @@ var server = net.createServer(function (request) {
         else {
           request.write(ok + '\n');
           request.write('DATE: ' + now.toUTCString() + '\n');
-          request.write('SERVER: myServerrr \r\n\r\n');
-          request.write(data + '\n');
+          request.write('SERVER: myServerrr\n');
+          request.write('Content-Length: ' + data.length + '\n\n');
+          request.write(data);
           request.end();
         }
       });
     }else if (methodReq === 'HEAD'){
+      console.log('Inside HEAD');
       //check if file exists
       fs.readFile('./public' + uriRequest, 'utf8', function (err, data) {
         if (err) {
