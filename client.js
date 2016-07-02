@@ -8,8 +8,8 @@ var host = input[2];
 var uriRequest = '/';
 //seperate uri from host name if '/' is present
 if (host.indexOf('/') !== -1){
-  host = host.substring(0, host.indexOf('/'));
   uriRequest = host.substring(host.indexOf('/'));
+  host = host.substring(0, host.indexOf('/'));
 }
 
 if (host === 'localhost') {
