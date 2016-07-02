@@ -22,26 +22,31 @@ var server = net.createServer(function (request) {
     if (uriRequest == '/'){
       uriRequest = '/index.html';
     }
-
+    var now = new Date();
     if (methodReq === 'GET'){
       //check if file exists
-      fs.readFile('./public/' + uriRequest, 'utf8', function (err, data) {
+      fs.readFile('./public' + uriRequest, 'utf8', function (err, data) {
         if (err) {
-          uriRequest = '404.html';
-          fs.readFile('./public/' + uriRequest, 'utf8', function (err, data) {
+          request.write(notFound + '\n');
+          request.write('DATE: ' + now.toUTCString() + '\n');
+          request.write('SERVER: myServerrr \r\n\r\n');
+          uriRequest = '/404.html';
+          fs.readFile('./public' + uriRequest, 'utf8', function (err, data) {
             request.write(data + '\n');
             request.end();
           });
         }
         else {
+          request.write(ok + '\n');
+          request.write('DATE: ' + now.toUTCString() + '\n');
+          request.write('SERVER: myServerrr \r\n\r\n');
           request.write(data + '\n');
           request.end();
         }
       });
     }else if (methodReq === 'HEAD'){
-      var now = new Date();
       //check if file exists
-      fs.readFile('./public/' + uriRequest, 'utf8', function (err, data) {
+      fs.readFile('./public' + uriRequest, 'utf8', function (err, data) {
         if (err) {
           request.write(notFound + '\n');
           request.write('DATE: ' + now.toUTCString() + '\n');
