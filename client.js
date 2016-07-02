@@ -5,7 +5,13 @@ var input = process.argv;
 
 var port = 80;
 var host = input[2];
+if (host === undefined){
+  console.log('Please add a URL to request. See example: "node client.js www.google.com"');
+  process.exit();
+}
+var method = 'GET';
 var uriRequest = '/';
+
 //seperate uri from host name if '/' is present
 if (host.indexOf('/') !== -1){
   uriRequest = host.substring(host.indexOf('/'));
@@ -21,7 +27,7 @@ var client = net.createConnection(port, host, function () {
   console.log('connected to server!');
 
   var now = new Date();
-  client.write('GET ' + uriRequest +' HTTP/1.0\r\n\r\n' +
+  client.write(method + ' ' + uriRequest +' HTTP/1.0\r\n\r\n' +
     'DATE: ' + now.toUTCString() + '\r\n' +
     'HOST: ' + host + ' \r\n' +
     'USER-AGENT: meeeeeeee');
