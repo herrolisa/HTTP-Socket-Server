@@ -2,8 +2,8 @@ var net = require('net');
 var fs = require('fs');
 
 //http status lines
-var ok = 'HTTP/1.1 200 OK';
-var notFound = 'HTTP/1.0 404 Not Found';
+var status200 = 'HTTP/1.1 200 OK';
+var status400 = 'HTTP/1.0 404 Not Found';
 
 //create a new local server
 var server = net.createServer(function (request) {
@@ -12,53 +12,56 @@ var server = net.createServer(function (request) {
     //Convert Header Request Line & Request Headers into an array
     var httpReqArr = data.split('\n');
     //split Header Request Line into array
-    var statusArr = httpReqArr[0].split(' ');
+    var reqLineArr = httpReqArr[0].split(' ');
     //seperate Request Method
-    var methodReq = statusArr[0];
+    var methodReq = reqLineArr[0];
     //seperate Request URI
-    var uriRequest = statusArr[1];
+    var uriRequest = reqLineArr[1];
 
     //change '/' to full index file name
     if (uriRequest == '/'){
       uriRequest = '/index.html';
     }
     var now = new Date();
+
     if (methodReq === 'GET'){
-      //check if file exists
-      fs.readFile('./public' + uriRequest, 'utf8', function (err, data) {
+      fs.readFile('./public' + uriRequest, 'utf8', function (err, responseBody) {
         if (err) {
-          request.write(notFound + '\n');
-          request.write('DATE: ' + now.toUTCString() + '\n');
-          request.write('SERVER: myServerrr \r\n\r\n');
+          request.cork();
+          request.write(status400 + '\n' +
+            'DATE: ' + now.toUTCString() + '\n' +
+            'SERVER: myServerrr \n\n');
           uriRequest = '/404.html';
-          fs.readFile('./public' + uriRequest, 'utf8', function (err, data) {
-            request.write(data + '\n');
+          fs.readFile('./public' + uriRequest, 'utf8', function (err, responseBody) {
+            request.write(responseBody + '\n');
+            request.uncork();
             request.end();
           });
-        }
-        else {
-          request.write(ok + '\n');
-          request.write('DATE: ' + now.toUTCString() + '\n');
-          request.write('SERVER: myServerrr\n');
-          request.write('Content-Length: ' + data.length + '\n\n');
-          request.write(data);
+        }else{
+          request.cork();
+          request.write(status200 + '\n' +
+            'DATE: ' + now.toUTCString() + '\n' +
+            'SERVER: myServerrr\n' +
+            'Content-Length: ' + responseBody.length + '\n\n');
+          request.write(responseBody);
+          request.uncork();
           request.end();
         }
       });
-    }else if (methodReq === 'HEAD'){
-      console.log('Inside HEAD');
+    }
+    else if (methodReq === 'HEAD'){
       //check if file exists
-      fs.readFile('./public' + uriRequest, 'utf8', function (err, data) {
+      fs.readFile('./public' + uriRequest, 'utf8', function (err, responseBody) {
         if (err) {
-          request.write(notFound + '\n');
-          request.write('DATE: ' + now.toUTCString() + '\n');
-          request.write('SERVER: myServerrr \n');
+          request.write(status400 + '\n' +
+            'DATE: ' + now.toUTCString() + '\n' +
+            'SERVER: myServerrr \n\n');
           request.end();
-        }
-        else {
-          request.write(ok + '\n');
-          request.write('DATE: ' + now.toUTCString() + '\n');
-          request.write('SERVER: myServerrr \n');
+        }else{
+           request.write(status200 + '\n' +
+            'DATE: ' + now.toUTCString() + '\n' +
+            'SERVER: myServerrr\n' +
+            'Content-Length: ' + responseBody.length + '\n\n');
           request.end();
         }
       });
